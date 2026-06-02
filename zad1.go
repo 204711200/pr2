@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Функция для вычисления значения Y в зависимости от X (логика графика)
+// Функция для вычисления значения Y в зависимости от X
 func calculateY(x float64) float64 {
 	if x <= -1 {
 		return -x - 2
@@ -39,6 +39,5 @@ func main() {
 	xEnd := 6.0
 	dx := 0.5
 
-	// В main остается только вызов управляющей функции
 	printTabulatedFunction(xStart, xEnd, dx)
 }
