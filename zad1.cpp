@@ -36,7 +36,6 @@ int main() {
     double x_end = 6.0;
     double dx = 0.5;
 
-    // main теперь только запускает процесс
     print_tabulated_function(x_start, x_end, dx);
 
     return 0;
