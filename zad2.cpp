@@ -18,13 +18,12 @@ uint64 power(uint64 a, uint64 b, uint64 n) {
     return res;
 }
 
-// Реализация алгоритма по шагам из вашего задания
 uint64 generate_gost_p(uint64 q, int t, double xi) {
     // Предварительный расчет границ
     uint64 pow_2_t_minus_1 = (uint64)1 << (t - 1);
     uint64 pow_2_t = (uint64)1 << t;
 
-    // Шаг 2: Вычислить N
+    // Вычисляем N
     // Формула: N = ceil(2^(t-1) / q) + ceil(2^(t-1) * xi / q)
     uint64 N = (uint64)ceil((double)pow_2_t_minus_1 / q) + 
                (uint64)ceil((double)pow_2_t_minus_1 * xi / q);
@@ -32,24 +31,24 @@ uint64 generate_gost_p(uint64 q, int t, double xi) {
     // Если N нечетное, то N = N + 1
     if (N % 2 != 0) N++;
 
-    // Шаг 3: Задать u = 0
+    // Задаем u = 0
     uint64 u = 0;
 
     while (true) {
-        // Шаг 4: Вычислить p = (N + u) * q + 1
+        // Вычисляем p = (N + u) * q + 1
         uint64 p = (N + u) * q + 1;
 
-        // Шаг 5: Если p > 2^t, вернуться на шаг 1 (в нашем случае - к новому xi)
+        // Если p > 2^t, вернуться на шаг 1 (в нашем случае - к новому xi)
         if (p > pow_2_t) return 0; 
 
-        // Шаг 6: Проверка условий теоремы Диемитко
+        // Проверка условий теоремы Диемитко
         // 1) 2^(p-1) == 1 (mod p)
         // 2) 2^(N+u) != 1 (mod p)
         if (power(2, p - 1, p) == 1 && power(2, N + u, p) != 1) {
             return p; // Выход: p - простое число
         }
 
-        // Шаг 7: u = u + 2
+        // u = u + 2
         u += 2;
     }
 }
