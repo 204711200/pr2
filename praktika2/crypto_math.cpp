@@ -4,7 +4,6 @@
 
 using namespace std;
 
-// Проверка числа на простоту
 bool isPrime(int64_t n) {
     if (n < 2) return false;
     for (int64_t i = 2; i * i <= n; ++i) {
@@ -13,7 +12,6 @@ bool isPrime(int64_t n) {
     return true;
 }
 
-// Задание 1: Бинарное возведение в степень по модулю (с защитой от зависаний)
 int64_t modPow(int64_t base, uint64_t power, int64_t module) {
     if (module <= 1) return 0;
     int64_t result = 1;
@@ -30,7 +28,6 @@ int64_t modPow(int64_t base, uint64_t power, int64_t module) {
     return result;
 }
 
-// Задание 2: Расширенный алгоритм Евклида
 int64_t extendedGcd(int64_t a, int64_t b, int64_t &u, int64_t &v) {
     if (b == 0) {
         u = 1;
@@ -44,7 +41,6 @@ int64_t extendedGcd(int64_t a, int64_t b, int64_t &u, int64_t &v) {
     return g;
 }
 
-// Задание 3: Нахождение обратного элемента по модулю
 int64_t modInverse(int64_t a, int64_t m) {
     int64_t u, v;
     int64_t g = extendedGcd(a, m, u, v);

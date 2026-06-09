@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <utility>
 #include <string>
+#include <vector>
 
 class ElGamal {
 private:
@@ -18,13 +19,17 @@ public:
     void generatePublicKey();
     int64_t getPublicKey() const;
 
-    // Задание 4: Передача сообщений
+    // Математический обмен для одного числа
     std::pair<int64_t, int64_t> encrypt(int64_t message, int64_t sessionKeyK);
     int64_t decrypt(int64_t a, int64_t b);
 
-    // Обязательное файловое требование №3 к проекту
-    void encryptFile(const std::string& inputPath, const std::string& outputPath, int64_t sessionKeyK);
-    void decryptFile(const std::string& inputPath, const std::string& outputPath);
+    // Новое: Работа со строками (ввод текста)
+    std::vector<std::pair<int64_t, int64_t>> encryptString(const std::string& text, int64_t sessionKeyK);
+    std::string decryptString(const std::vector<std::pair<int64_t, int64_t>>& cipherText);
+
+    // Работа с реальными файлами по пути
+    bool encryptFile(const std::string& inputPath, const std::string& outputPath, int64_t sessionKeyK);
+    bool decryptFile(const std::string& inputPath, const std::string& outputPath);
 };
 
 #endif

@@ -22,33 +22,60 @@ int64_t ElGamal::getPublicKey() const {
 }
 
 std::pair<int64_t, int64_t> ElGamal::encrypt(int64_t message, int64_t sessionKeyK) {
-    cout << "\n--- Вычисления шифрования Эль-Гамаля ---" << endl;
     int64_t a = modPow(g, sessionKeyK, p);
-    cout << "  Компонента a = g^k mod p = " << a << endl;
-
     int64_t y_pow_k = modPow(y, sessionKeyK, p);
     int64_t b = (message % p * y_pow_k) % p;
-    cout << "  Компонента b = (m * y^k) mod p = " << b << endl;
-
     return {a, b};
 }
 
 int64_t ElGamal::decrypt(int64_t a, int64_t b) {
-    cout << "\n--- Вычисления расшифрования Эль-Гамаля ---" << endl;
     int64_t ax = modPow(a, x, p);
-    cout << "  Маска сессии ax = a^x mod p = " << ax << endl;
-
     int64_t ax_inverse = modInverse(ax, p);
-    cout << "  Обратный элемент маски = " << ax_inverse << endl;
-
     if (ax_inverse == -1) return -1;
     return (b * ax_inverse) % p;
 }
 
-void ElGamal::encryptFile(const string& inputPath, const string& outputPath, int64_t sessionKeyK) {
+// Посимвольное шифрование строки (исправлено переполнение и UTF-8)
+std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const string& text, int64_t sessionKeyK) {
+    vector<pair<int64_t, int64_t>> result;
+    int64_t a = modPow(g, sessionKeyK, p);
+    int64_t y_pow_k = modPow(y, sessionKeyK, p);
+    
+    cout << "  Компонента a (общая для строки) = " << a << endl;
+    cout << "  Маскирующий множитель y^k mod p = " << y_pow_k << endl;
+
+    for (char c : text) {
+        // Защита знака байта для кириллицы
+        int64_t message = static_cast<unsigned char>(c);
+        int64_t b = (message * y_pow_k) % p;
+        result.push_back({a, b});
+    }
+    return result;
+}
+
+// Расшифрование строки (исправлено переполнение)
+std::string ElGamal::decryptString(const vector<pair<int64_t, int64_t>>& cipherText) {
+    string result = "";
+    if (cipherText.empty()) return result;
+
+    int64_t a = cipherText[0].first;
+    int64_t ax = modPow(a, x, p);
+    int64_t ax_inverse = modInverse(ax, p);
+    if (ax_inverse == -1) return "[Ошибка дешифрования]";
+
+    for (const auto& pair : cipherText) {
+        int64_t b = pair.second;
+        int64_t decryptedMessage = (b * ax_inverse) % p;
+        result += static_cast<char>(decryptedMessage);
+    }
+    return result;
+}
+
+// Шифрование файла по пути
+bool ElGamal::encryptFile(const string& inputPath, const string& outputPath, int64_t sessionKeyK) {
     ifstream inFile(inputPath, ios::binary);
     ofstream outFile(outputPath, ios::binary);
-    if (!inFile.is_open() || !outFile.is_open()) return;
+    if (!inFile.is_open() || !outFile.is_open()) return false;
 
     char byte;
     int64_t a = modPow(g, sessionKeyK, p);
@@ -62,12 +89,14 @@ void ElGamal::encryptFile(const string& inputPath, const string& outputPath, int
     }
     inFile.close();
     outFile.close();
+    return true;
 }
 
-void ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
+// Расшифрование файла по пути
+bool ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
     ifstream inFile(inputPath, ios::binary);
     ofstream outFile(outputPath, ios::binary);
-    if (!inFile.is_open() || !outFile.is_open()) return;
+    if (!inFile.is_open() || !outFile.is_open()) return false;
 
     int64_t a, b;
     bool firstByte = true;
@@ -78,7 +107,7 @@ void ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
         if (firstByte) {
             int64_t ax = modPow(a, x, p);
             ax_inverse = modInverse(ax, p);
-            if (ax_inverse == -1) return;
+            if (ax_inverse == -1) return false;
             firstByte = false;
         }
         int64_t decryptedMessage = (b * ax_inverse) % p;
@@ -87,4 +116,5 @@ void ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
     }
     inFile.close();
     outFile.close();
+    return true;
 }
