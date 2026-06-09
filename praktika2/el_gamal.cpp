@@ -3,86 +3,88 @@
 #include <iostream>
 #include <fstream>
 
-bool elgamal_encrypt_file(const std::string& input_path, const std::string& output_path, ElGamalPublicKey pub_key, int64_t secret_k) {
-    std::ifstream in(input_path, std::ios::binary);
-    std::ofstream out(output_path, std::ios::binary);
-    if (!in || !out) return false;
+using namespace std;
 
-    std::cout << "\n[Эль-Гамаль Шифрование] Обработка файла...\n";
+ElGamal::ElGamal(int64_t prime, int64_t generator, int64_t privateKey) {
+    p = prime;
+    g = generator;
+    x = privateKey;
+    y = 0;
+}
+
+void ElGamal::generatePublicKey() {
+    y = modPow(g, x, p);
+    cout << "  [Вычисление] Открытый ключ y = g^x mod p = " << y << endl;
+}
+
+int64_t ElGamal::getPublicKey() const {
+    return y;
+}
+
+std::pair<int64_t, int64_t> ElGamal::encrypt(int64_t message, int64_t sessionKeyK) {
+    cout << "\n--- Вычисления шифрования Эль-Гамаля ---" << endl;
+    int64_t a = modPow(g, sessionKeyK, p);
+    cout << "  Компонента a = g^k mod p = " << a << endl;
+
+    int64_t y_pow_k = modPow(y, sessionKeyK, p);
+    int64_t b = (message % p * y_pow_k) % p;
+    cout << "  Компонента b = (m * y^k) mod p = " << b << endl;
+
+    return {a, b};
+}
+
+int64_t ElGamal::decrypt(int64_t a, int64_t b) {
+    cout << "\n--- Вычисления расшифрования Эль-Гамаля ---" << endl;
+    int64_t ax = modPow(a, x, p);
+    cout << "  Маска сессии ax = a^x mod p = " << ax << endl;
+
+    int64_t ax_inverse = modInverse(ax, p);
+    cout << "  Обратный элемент маски = " << ax_inverse << endl;
+
+    if (ax_inverse == -1) return -1;
+    return (b * ax_inverse) % p;
+}
+
+void ElGamal::encryptFile(const string& inputPath, const string& outputPath, int64_t sessionKeyK) {
+    ifstream inFile(inputPath, ios::binary);
+    ofstream outFile(outputPath, ios::binary);
+    if (!inFile.is_open() || !outFile.is_open()) return;
+
     char byte;
-    while (in.get(byte)) {
-        int64_t m = static_cast<uint8_t>(byte);
-        
-        // а = g^k mod p
-        int64_t a = power_modular_bin(pub_key.g, secret_k, pub_key.p);
-        // b = (m * y^k) mod p
-        int64_t y_k = power_modular_bin(pub_key.y, secret_k, pub_key.p);
-        int64_t b = (static_cast<__int128>(m) * y_k) % pub_key.p;
+    int64_t a = modPow(g, sessionKeyK, p);
+    int64_t y_pow_k = modPow(y, sessionKeyK, p);
 
-        // Записываем пару (a, b) в файл. Каждый элемент сохраняем как int64_t (8 байт)
-        out.write(reinterpret_cast<const char*>(&a), sizeof(a));
-        out.write(reinterpret_cast<const char*>(&b), sizeof(b));
+    while (inFile.get(byte)) {
+        int64_t message = static_cast<unsigned char>(byte);
+        int64_t b = (message * y_pow_k) % p;
+        outFile.write(reinterpret_cast<const char*>(&a), sizeof(a));
+        outFile.write(reinterpret_cast<const char*>(&b), sizeof(b));
     }
-    return true;
+    inFile.close();
+    outFile.close();
 }
 
-bool elgamal_decrypt_file(const std::string& input_path, const std::string& output_path, ElGamalPublicKey pub_key, int64_t private_x) {
-    std::ifstream in(input_path, std::ios::binary);
-    std::ofstream out(output_path, std::ios::binary);
-    if (!in || !out) return false;
+void ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
+    ifstream inFile(inputPath, ios::binary);
+    ofstream outFile(outputPath, ios::binary);
+    if (!inFile.is_open() || !outFile.is_open()) return;
 
-    std::cout << "[Эль-Гамаль Расшифрование] Обработка зашифрованного файла...\n";
     int64_t a, b;
-    while (in.read(reinterpret_cast<char*>(&a), sizeof(a)) && in.read(reinterpret_cast<char*>(&b), sizeof(b))) {
-        // m = b * (a^x)^-1 mod p
-        int64_t ax = power_modular_bin(a, private_x, pub_key.p);
-        int64_t ax_inv = modular_inverse(ax, pub_key.p);
-        
-        if (ax_inv == -1) {
-            std::cerr << "[Ошибка] Не удалось найти обратный элемент при дешифровании!\n";
-            return false;
+    bool firstByte = true;
+    int64_t ax_inverse = -1;
+
+    while (inFile.read(reinterpret_cast<char*>(&a), sizeof(a)) &&
+           inFile.read(reinterpret_cast<char*>(&b), sizeof(b))) {
+        if (firstByte) {
+            int64_t ax = modPow(a, x, p);
+            ax_inverse = modInverse(ax, p);
+            if (ax_inverse == -1) return;
+            firstByte = false;
         }
-        
-        int64_t m = (static_cast<__int128>(b) * ax_inv) % pub_key.p;
-        char decrypted_byte = static_cast<char>(m);
-        out.put(decrypted_byte);
+        int64_t decryptedMessage = (b * ax_inverse) % p;
+        char byte = static_cast<char>(decryptedMessage);
+        outFile.put(byte);
     }
-    return true;
-}
-
-void run_elgamal_file_protocol() {
-    std::cout << "\n=== Задание 4: Криптосистема Эль-Гамаля (Вариант 3) ===\n";
-    
-    // Параметры системы (выбираются безопасные p > 256)
-    int64_t p = 683; // Простое число
-    int64_t g = 5;   // Первообразный корень
-    int64_t x = 123; // Секретный ключ получателя (x < p)
-    
-    // Открытый ключ y = g^x mod p
-    int64_t y = power_modular_bin(g, x, p);
-    ElGamalPublicKey pub_key = {p, g, y};
-
-    std::cout << "[Ключи] Сгенерированы:\n";
-    std::cout << "  Открытый ключ (p=" << p << ", g=" << g << ", y=" << y << ")\n";
-    std::cout << "  Закрытый ключ (x=" << x << ")\n";
-
-    // Создаем тестовый файл
-    std::string src = "input_v3.txt";
-    std::string enc = "encrypted_v3.bin";
-    std::string dec = "decrypted_v3.txt";
-
-    std::ofstream out(src);
-    out << "Secret Text for Variant 3 (El-Gamal)";
-    out.close();
-
-    // Случайная сессионная переменная отправителя k (должна быть взаимно проста с p-1)
-    int64_t k = 17; 
-
-    // Шифруем и расшифровываем
-    if (elgamal_encrypt_file(src, enc, pub_key, k)) {
-        std::cout << "[Успех] Файл зашифрован в '" << enc << "'\n";
-    }
-    if (elgamal_decrypt_file(enc, dec, pub_key, x)) {
-        std::cout << "[Успех] Файл расшифрован в '" << dec << "'\n";
-    }
+    inFile.close();
+    outFile.close();
 }
