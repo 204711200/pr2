@@ -20,14 +20,6 @@ void runTask1() {
         cout << "Число " << p << " НЕ является простым!\n";
     }
 
-    int64_t temp = x;
-    string binary = "";
-    while (temp > 0) {
-        binary = to_string(temp % 2) + binary;
-        temp /= 2;
-    }
-    cout << "Степень " << x << " в двоичной системе: " << binary << endl;
-
     int64_t res = modPow(a, x, p);
     cout << "Результат: " << a << "^" << x << " mod " << p << " = " << res << "\n";
 }
@@ -85,12 +77,6 @@ void runTask4() {
         getline(cin, text);
 
         auto cipherText = alice.encryptString(text, kB);
-        
-        cout << "\nПолученный шифртекст (пары чисел a и b):\n";
-        for (const auto& pair : cipherText) {
-            cout << "(" << pair.first << ", " << pair.second << ") ";
-        }
-        cout << endl;
 
         string decryptedText = alice.decryptString(cipherText);
         cout << "Расшифрованная строка: \"" << decryptedText << "\"\n";
