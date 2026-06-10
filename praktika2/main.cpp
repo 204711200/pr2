@@ -84,7 +84,6 @@ void runTask4() {
         cin.ignore(); 
         getline(cin, text);
 
-        // Шифруем без вывода промежуточных расчетов математики на экран
         auto cipherText = alice.encryptString(text, kB);
         
         cout << "\nПолученный шифртекст (пары чисел a и b):\n";
@@ -131,6 +130,42 @@ void runTask4() {
     }
 }
 
+void runTask5() {
+    cout << "\n================ ЗАДАНИЕ 5 ================\n";
+    int64_t p, g, xA, kB, message;
+    
+    cout << "Простое число p: "; cin >> p;
+    cout << "Первообразный корень g: "; cin >> g;
+    
+    cout << "\n[Получатель Алиса] Введите секретный ключ x: "; cin >> xA;
+    ElGamal alice(p, g, xA);
+    alice.generatePublicKey();
+
+    cout << "\n[Отправитель Боб] Введите сообщение (число m < p): "; cin >> message;
+    cout << "[Отправитель Боб] Введите сессионный ключ k: "; cin >> kB;
+
+    // Шифрование исходного числа Бобом
+    auto cipher = alice.encrypt(message, kB);
+    int64_t a = cipher.first;
+    int64_t b = cipher.second;
+
+    cout << "\nБоб отправил шифртекст Алисе: (a = " << a << ", b = " << b << ")\n";
+
+    // Перехват и атака Евы
+    cout << "\n[Перехват Евы] Введите множитель для изменения сообщения: ";
+    int64_t attackFactor;
+    cin >> attackFactor;
+
+    int64_t modified_b = (b * attackFactor) % p;
+    cout << "Ева подменила шифртекст на: (a = " << a << ", b = " << modified_b << ")\n";
+
+    // Расшифрование Алисой измененного шифра
+    int64_t decryptedMessage = alice.decrypt(a, modified_b);
+    cout << "\nАлиса расшифровала полученный шифртекст.\n";
+    cout << "Результат расшифрования Алисы: " << decryptedMessage << "\n";
+    cout << "Ожидаемый результат атаки (m * множитель mod p): " << (message * attackFactor) % p << "\n";
+}
+
 int main() {
     int choice;
     do {
@@ -139,6 +174,7 @@ int main() {
         cout << "2. Задание 2\n";
         cout << "3. Задание 3\n";
         cout << "4. Задание 4\n";
+        cout << "5. Задание 5\n";
         cout << "0. Выход\n";
         cout << "Ваш выбор: ";
         cin >> choice;
@@ -148,6 +184,7 @@ int main() {
             case 2: runTask2(); break;
             case 3: runTask3(); break;
             case 4: runTask4(); break;
+            case 5: runTask5(); break;
             case 0: cout << "Выход из программы.\n"; break;
             default: cout << "Неверный пункт меню!\n";
         }
