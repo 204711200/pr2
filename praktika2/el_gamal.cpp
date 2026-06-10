@@ -35,7 +35,6 @@ int64_t ElGamal::decrypt(int64_t a, int64_t b) {
     return (b * ax_inverse) % p;
 }
 
-// Посимвольное шифрование строки (исправлено переполнение и UTF-8)
 std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const string& text, int64_t sessionKeyK) {
     vector<pair<int64_t, int64_t>> result;
     int64_t a = modPow(g, sessionKeyK, p);
@@ -45,7 +44,6 @@ std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const string& te
     cout << "  Маскирующий множитель y^k mod p = " << y_pow_k << endl;
 
     for (char c : text) {
-        // Защита знака байта для кириллицы
         int64_t message = static_cast<unsigned char>(c);
         int64_t b = (message * y_pow_k) % p;
         result.push_back({a, b});
@@ -53,7 +51,6 @@ std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const string& te
     return result;
 }
 
-// Расшифрование строки (исправлено переполнение)
 std::string ElGamal::decryptString(const vector<pair<int64_t, int64_t>>& cipherText) {
     string result = "";
     if (cipherText.empty()) return result;
@@ -71,7 +68,6 @@ std::string ElGamal::decryptString(const vector<pair<int64_t, int64_t>>& cipherT
     return result;
 }
 
-// Шифрование файла по пути
 bool ElGamal::encryptFile(const string& inputPath, const string& outputPath, int64_t sessionKeyK) {
     ifstream inFile(inputPath, ios::binary);
     ofstream outFile(outputPath, ios::binary);
@@ -92,7 +88,6 @@ bool ElGamal::encryptFile(const string& inputPath, const string& outputPath, int
     return true;
 }
 
-// Расшифрование файла по пути
 bool ElGamal::decryptFile(const string& inputPath, const string& outputPath) {
     ifstream inFile(inputPath, ios::binary);
     ofstream outFile(outputPath, ios::binary);

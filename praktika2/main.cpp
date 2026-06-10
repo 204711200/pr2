@@ -60,10 +60,10 @@ void runTask3() {
 }
 
 void runTask4() {
-    cout << "\n================ ЗАДАНИЕ 4 (Шифросистема Эль-Гамаля) ================\n";
+    cout << "\n================ ЗАДАНИЕ 4 ================\n";
     int64_t p, g, xA, kB;
     
-    cout << "Простое число p (Рекомендуется > 255 для строк): "; cin >> p;
+    cout << "Простое число p : "; cin >> p;
     cout << "Первообразный корень g: "; cin >> g;
     
     cout << "\n[Получатель Алиса] Введите секретный ключ x: "; cin >> xA;
@@ -72,9 +72,8 @@ void runTask4() {
 
     cout << "\n[Отправитель Боб] Введите случайный сессионный ключ k: "; cin >> kB;
 
-    cout << "\n--- ВЫБОР РЕЖИМА РАБОТЫ (как у Глеба) ---\n";
-    cout << "1. Ввести текст вручную в консоли\n";
-    cout << "2. Зашифровать реальный файл по пути на диске\n";
+    cout << "\n1. Ввести текст вручную в консоли\n";
+    cout << "2. Указать путь\n";
     cout << "Ваш выбор: ";
     int mode;
     cin >> mode;
@@ -85,53 +84,43 @@ void runTask4() {
         cin.ignore(); 
         getline(cin, text);
 
-        cout << "\n--- Процесс шифрования строки ---" << endl;
+        // Шифруем без вывода промежуточных расчетов математики на экран
         auto cipherText = alice.encryptString(text, kB);
         
-        cout << "\nПолученный шифртекст (пары чисел a и b для каждого символа):\n";
+        cout << "\nПолученный шифртекст (пары чисел a и b):\n";
         for (const auto& pair : cipherText) {
             cout << "(" << pair.first << ", " << pair.second << ") ";
         }
         cout << endl;
 
-        cout << "\n--- Процесс расшифрования строки ---" << endl;
         string decryptedText = alice.decryptString(cipherText);
-        cout << "Успешно восстановленный текст: \"" << decryptedText << "\"\n";
+        cout << "Расшифрованная строка: \"" << decryptedText << "\"\n";
     } 
     else if (mode == 2) {
-        string inputPath, outputPath, decryptedPath;
-        cout << "Введите имя/путь исходного файла (например, plaintext.txt): ";
+        string inputPath;
+        cout << "Введите имя/путь исходного файла: ";
         cin >> inputPath;
-        cout << "Введите имя для зашифрованного файла (например, encrypted.dat): ";
-        cin >> outputPath;
-        cout << "Введите имя для расшифрованного файла (например, decrypted.txt): ";
-        cin >> decryptedPath;
 
-        // Создаем тестовый файл, если пользователь указал стандартное имя, а файла на диске нет
-        /*if (inputPath == "plaintext.txt") {
-            ofstream testFile(inputPath);
-            testFile << "Novosibirsk State Technical University, NETI 2026. Custom File Path Test.";
-            testFile.close();
-            cout << "[Инфо] Создан автоматический файл 'plaintext.txt' с тестовыми данными.\n";
-        } */
+        string outputPath = inputPath + ".enc";  
+        string decryptedPath = inputPath + ".dec"; 
 
-        cout << "\nВыполняется побайтовое шифрование файла..." << endl;
         if (alice.encryptFile(inputPath, outputPath, kB)) {
-            cout << "[Успех] Файл зашифрован и сохранен в '" << outputPath << "'\n";
+            cout << "Файл зашифрован.\n";
         } else {
-            cout << "[Ошибка] Не удалось открыть файлы для шифрования.\n";
+            cout << "Не удалось открыть исходный файл.\n";
             return;
         }
 
-        cout << "Выполняется побайтовое расшифрование файла..." << endl;
         if (alice.decryptFile(outputPath, decryptedPath)) {
-            cout << "[Успех] Файл расшифрован и сохранен в '" << decryptedPath << "'\n";
+            cout << "Файл расшифрован.\n";
             
             ifstream resFile(decryptedPath);
             string content;
-            if (getline(resFile, content)) {
-                cout << "[Результат] Содержимое восстановленного файла: \"" << content << "\"\n";
+            cout << "Содержимое восстановленного файла: \"";
+            while (getline(resFile, content)) {
+                cout << content << (resFile.eof() ? "" : "\n");
             }
+            cout << "\"\n";
             resFile.close();
         } else {
             cout << "[Ошибка] Не удалось расшифровать файл.\n";
@@ -145,11 +134,11 @@ void runTask4() {
 int main() {
     int choice;
     do {
-        cout << "\n--- МЕНЮ ПРАКТИЧЕСКОЙ РАБОТЫ №2 ---\n";
-        cout << "1. Задание 1 (a^x mod p)\n";
-        cout << "2. Задание 2 (Расширенный алгоритм Евклида)\n";
-        cout << "3. Задание 3 (Обратный элемент)\n";
-        cout << "4. Задание 4 (Криптосистема Эль-Гамаля: Текст / Путь к файлу)\n";
+        cout << "\n================ МЕНЮ ================\n";
+        cout << "1. Задание 1\n";
+        cout << "2. Задание 2\n";
+        cout << "3. Задание 3\n";
+        cout << "4. Задание 4\n";
         cout << "0. Выход\n";
         cout << "Ваш выбор: ";
         cin >> choice;

@@ -19,15 +19,14 @@ public:
     void generatePublicKey();
     int64_t getPublicKey() const;
 
-    // Математический обмен для одного числа
     std::pair<int64_t, int64_t> encrypt(int64_t message, int64_t sessionKeyK);
     int64_t decrypt(int64_t a, int64_t b);
 
-    // Новое: Работа со строками (ввод текста)
+    // Работа со строками (ввод текста вручную)
     std::vector<std::pair<int64_t, int64_t>> encryptString(const std::string& text, int64_t sessionKeyK);
     std::string decryptString(const std::vector<std::pair<int64_t, int64_t>>& cipherText);
 
-    // Работа с реальными файлами по пути
+    // Работа с реальными файлами по пути на диске
     bool encryptFile(const std::string& inputPath, const std::string& outputPath, int64_t sessionKeyK);
     bool decryptFile(const std::string& inputPath, const std::string& outputPath);
 };
