@@ -2,10 +2,37 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <limits>
 #include "crypto_math.h"
 #include "el_gamal.h"
 
 using namespace std;
+
+// Строго типизированный enum для пунктов меню, как на скриншоте
+enum class MenuOption {
+    EXIT = 0,
+    POWER_MOD = 1,
+    EUCLID = 2,
+    MODUL_INVERSE = 3,
+    EL_GAMAL = 4
+};
+
+// Функция для очистки буфера ввода при ошибках
+void clearInput() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+// Вынос интерфейса меню в отдельную функцию
+void showMenu() {
+    cout << "\n================ МЕНЮ ================\n";
+    cout << "1. Задание 1\n";
+    cout << "2. Задание 2\n";
+    cout << "3. Задание 3\n";
+    cout << "4. Задание 4\n";
+    cout << "0. Выход\n";
+    cout << "Ваш выбор: ";
+}
 
 void a_x_mod_p() {
     cout << "\n================ ЗАДАНИЕ 1 ================\n";
@@ -116,64 +143,49 @@ void El_Jamal() {
     }
 }
 
-void ataka_poseredine() {
-    cout << "\n================ ЗАДАНИЕ 5 ================\n";
-    int64_t p, g, xA, kB, message;
-    
-    cout << "Простое число p: "; cin >> p;
-    cout << "Первообразный корень g: "; cin >> g;
-    
-    cout << "\n[Получатель Алиса] Введите секретный ключ x: "; cin >> xA;
-    ElGamal alice(p, g, xA);
-    alice.generatePublicKey();
-
-    cout << "\n[Отправитель Боб] Введите сообщение (число m < p): "; cin >> message;
-    cout << "[Отправитель Боб] Введите сессионный ключ k: "; cin >> kB;
-
-    // Шифрование исходного числа Бобом
-    auto cipher = alice.encrypt(message, kB);
-    int64_t a = cipher.first;
-    int64_t b = cipher.second;
-
-    cout << "\nБоб отправил шифртекст Алисе: (a = " << a << ", b = " << b << ")\n";
-
-    // Перехват и атака Евы
-    cout << "\n[Перехват Евы] Введите множитель для изменения сообщения: ";
-    int64_t attackFactor;
-    cin >> attackFactor;
-
-    int64_t modified_b = (b * attackFactor) % p;
-    cout << "Ева подменила шифртекст на: (a = " << a << ", b = " << modified_b << ")\n";
-
-    // Расшифрование Алисой измененного шифра
-    int64_t decryptedMessage = alice.decrypt(a, modified_b);
-    cout << "\nАлиса расшифровала полученный шифртекст.\n";
-    cout << "Результат расшифрования Алисы: " << decryptedMessage << "\n";
-    cout << "Ожидаемый результат атаки (m * множитель mod p): " << (message * attackFactor) % p << "\n";
-}
-
 int main() {
     int choice;
+    cout << "Добро пожаловать\n";
+
     do {
-        cout << "\n================ МЕНЮ ================\n";
-        cout << "1. Задание 1\n";
-        cout << "2. Задание 2\n";
-        cout << "3. Задание 3\n";
-        cout << "4. Задание 4\n";
-        cout << "5. Задание 5\n";
-        cout << "0. Выход\n";
-        cout << "Ваш выбор: ";
+        showMenu();
         cin >> choice;
 
-        switch (choice) {
-            case 1: a_x_mod_p(); break;
-            case 2: algoritm_Evklida(); break;
-            case 3: obratny_element(); break;
-            case 4: El_Jamal(); break;
-            case 5: ataka_poseredine(); break;
-            case 0: cout << "Выход из программы.\n"; break;
-            default: cout << "Неверный пункт меню!\n";
+        // Защита от ввода букв вместо цифр (как на фото)
+        if (cin.fail()) {
+            clearInput();
+            cout << "Ошибка, введите число от 0 до 4\n";
+            continue;
+        }
+
+        MenuOption option = static_cast<MenuOption>(choice);
+
+        switch (option) {
+            case MenuOption::POWER_MOD:
+                a_x_mod_p();
+                break;
+                
+            case MenuOption::EUCLID:
+                algoritm_Evklida();
+                break;
+                
+            case MenuOption::MODUL_INVERSE:
+                obratny_element();
+                break;
+                
+            case MenuOption::EL_GAMAL:
+                El_Jamal();
+                break;
+                
+            case MenuOption::EXIT:
+                cout << "\nДо свидания\n";
+                break;
+                
+            default:
+                cout << "Неверный выбор\n";
+                break;
         }
     } while (choice != 0);
+
     return 0;
 }
