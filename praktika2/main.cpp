@@ -8,28 +8,27 @@
 
 using namespace std;
 
-// Строго типизированный enum для пунктов меню, как на скриншоте
 enum class MenuOption {
     EXIT = 0,
     POWER_MOD = 1,
     EUCLID = 2,
     MODUL_INVERSE = 3,
-    EL_GAMAL = 4
+    EL_GAMAL = 4,
+    MITM_ATTACK = 5 // Добавлено задание 5
 };
 
-// Функция для очистки буфера ввода при ошибках
 void clearInput() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-// Вынос интерфейса меню в отдельную функцию
 void showMenu() {
     cout << "\n================ МЕНЮ ================\n";
     cout << "1. Задание 1\n";
     cout << "2. Задание 2\n";
     cout << "3. Задание 3\n";
     cout << "4. Задание 4\n";
+    cout << "5. Задание 5\n"; // Добавлено в вывод
     cout << "0. Выход\n";
     cout << "Ваш выбор: ";
 }
@@ -143,6 +142,41 @@ void El_Jamal() {
     }
 }
 
+void runTask5() {
+    cout << "\n================ ЗАДАНИЕ 5 ================\n";
+    int64_t p, g, xA, kB, message;
+    
+    cout << "Простое число p: "; cin >> p;
+    cout << "Первообразный корень g: "; cin >> g;
+    
+    cout << "\n[Алиса] Введите приватный ключ x: "; cin >> xA;
+    ElGamal alice(p, g, xA);
+    alice.generatePublicKey();
+
+    cout << "\n[Боб] Введите сообщение (число m < p): "; cin >> message;
+    cout << "[Боб] Введите сессионный ключ k: "; cin >> kB;
+
+    // Генерация оригинального шифртекста
+    auto cipher = alice.encrypt(message, kB);
+    int64_t a = cipher.first;
+    int64_t b = cipher.second;
+
+    cout << "\n[Канал связи] Исходный шифртекст от Боба: (a = " << a << ", b = " << b << ")\n";
+
+    // Имитация действий перехватчика
+    cout << "\n[Ева] Введите множитель для изменения текста: ";
+    int64_t attackFactor;
+    cin >> attackFactor;
+
+    int64_t modified_b = (b * attackFactor) % p;
+    cout << "[Канал связи] Измененный Евой шифртекст: (a = " << a << ", b = " << modified_b << ")\n";
+
+    // Алиса расшифровывает поддельный пакет
+    int64_t decryptedMessage = alice.decrypt(a, modified_b);
+    cout << "\n[Алиса] Результат расшифрования: " << decryptedMessage << "\n";
+    cout << "  Проверка гомоморфного сдвига (m * factor mod p): " << (message * attackFactor) % p << "\n";
+}
+
 int main() {
     int choice;
     cout << "Добро пожаловать\n";
@@ -151,10 +185,9 @@ int main() {
         showMenu();
         cin >> choice;
 
-        // Защита от ввода букв вместо цифр (как на фото)
         if (cin.fail()) {
             clearInput();
-            cout << "Ошибка, введите число от 0 до 4\n";
+            cout << "Ошибка, введите число от 0 до 5\n";
             continue;
         }
 
@@ -175,6 +208,10 @@ int main() {
                 
             case MenuOption::EL_GAMAL:
                 El_Jamal();
+                break;
+                
+            case MenuOption::MITM_ATTACK:
+                runTask5();
                 break;
                 
             case MenuOption::EXIT:

@@ -18,12 +18,20 @@ int64_t modPow(int64_t base, uint64_t power, int64_t module) {
     base = base % module;
     if (base < 0) base += module; 
 
+    // Вывод начальных данных для протоколирования шагов
+    cout << "  [Шаг] Инициализация: base = " << base << ", power = " << power << "\n";
+
+    int step = 1;
     while (power > 0) {
         if (power & 1) {
             result = (result * base) % module;
+            cout << "    Итерация " << step << ": бит степени = 1, текущий result = " << result << "\n";
+        } else {
+            cout << "    Итерация " << step << ": бит степени = 0, result без изменений\n";
         }
         base = (base * base) % module;
         power >>= 1; 
+        step++;
     }
     return result;
 }
@@ -38,6 +46,9 @@ int64_t extendedGcd(int64_t a, int64_t b, int64_t &u, int64_t &v) {
     int64_t g = extendedGcd(b, a % b, u1, v1);
     u = v1;
     v = u1 - (a / b) * v1;
+    
+    // Показываем промежуточные коэффициенты Безу на обратном ходу рекурсии
+    cout << "  [Рекурсия] НОД(" << a << ", " << b << "): u = " << u << ", v = " << v << "\n";
     return g;
 }
 
