@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void runTask1() {
+void a_x_mod_p() {
     cout << "\n================ ЗАДАНИЕ 1 ================\n";
     int64_t a, x, p;
     cout << "Основание a: "; cin >> a;
@@ -24,7 +24,7 @@ void runTask1() {
     cout << "Результат: " << a << "^" << x << " mod " << p << " = " << res << "\n";
 }
 
-void runTask2() {
+void algoritm_Evklida() {
     cout << "\n================ ЗАДАНИЕ 2 ================\n";
     int64_t c, m, u, v;
     cout << "Число c: "; cin >> c;
@@ -36,7 +36,7 @@ void runTask2() {
     cout << "Проверка: " << c << " * " << u << " + " << m << " * " << v << " = " << g << "\n";
 }
 
-void runTask3() {
+void obratny_element() {
     cout << "\n================ ЗАДАНИЕ 3 ================\n";
     int64_t c, m;
     cout << "Число c: "; cin >> c;
@@ -51,7 +51,7 @@ void runTask3() {
     }
 }
 
-void runTask4() {
+void El_Jamal() {
     cout << "\n================ ЗАДАНИЕ 4 ================\n";
     int64_t p, g, xA, kB;
     
@@ -116,7 +116,7 @@ void runTask4() {
     }
 }
 
-void runTask5() {
+void ataka_poseredine() {
     cout << "\n================ ЗАДАНИЕ 5 ================\n";
     int64_t p, g, xA, kB, message;
     
@@ -166,11 +166,11 @@ int main() {
         cin >> choice;
 
         switch (choice) {
-            case 1: runTask1(); break;
-            case 2: runTask2(); break;
-            case 3: runTask3(); break;
-            case 4: runTask4(); break;
-            case 5: runTask5(); break;
+            case 1: a_x_mod_p(); break;
+            case 2: algoritm_Evklida(); break;
+            case 3: obratny_element(); break;
+            case 4: El_Jamal(); break;
+            case 5: ataka_poseredine(); break;
             case 0: cout << "Выход из программы.\n"; break;
             default: cout << "Неверный пункт меню!\n";
         }
