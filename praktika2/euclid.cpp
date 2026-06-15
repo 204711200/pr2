@@ -1,10 +1,13 @@
 #include "euclid.h"
 #include <iostream>
 
+// Расширенный алгоритм Евклида (табличный метод)
+// Находит НОД и коэффициенты u, v для линейного представления: a*u + b*v = НОД
 GCDResult extendedGCD(int64_t a, int64_t b) {
     std::cout << "\nРасширенный алгоритм Евклида\n";
     std::cout << "Ищем u и v: " << a << "·u + " << b << "·v = gcd(" << a << ", " << b << ")\n\n";
     
+    // Инициализация базовых строк таблицы
     int64_t u1 = 1, u2 = 0, u3 = a;
     int64_t v1 = 0, v2 = 1, v3 = b;
     
@@ -18,11 +21,11 @@ GCDResult extendedGCD(int64_t a, int64_t b) {
         
         std::cout << "\nШаг " << step << ":\n";
         std::cout << "  q = " << u3 << " / " << v3 << " = " << q << "\n";
-        
+        // Вычисление новой строки таблицы через линейную комбинацию
         int64_t t1 = u1 - q * v1;
         int64_t t2 = u2 - q * v2;
         int64_t t3 = u3 - q * v3;
-        
+        // Сдвиг регистров/строк
         u1 = v1; u2 = v2; u3 = v3;
         v1 = t1; v2 = t2; v3 = t3;
         
@@ -39,11 +42,13 @@ GCDResult extendedGCD(int64_t a, int64_t b) {
     return GCDResult{u3, u1, u2};
 }
 
+// Задание 3: Нахождение мультипликативно обратного элемента: c^(-1) mod m
 int64_t modularInverse(int64_t c, int64_t m) {
     std::cout << "\nНахождение обратного числа\n";
     std::cout << "Нужно найти d такое, что " << c << "·d = 1 (mod " << m << ")\n";
     std::cout << "Это значит: " << c << "·d + " << m << "·v = 1\n";
     
+    // Обратное число является коэффициентом Безу из расширенного алгоритма Евклида
     GCDResult res = extendedGCD(c, m);
     
     if (res.gcd != 1) {
@@ -53,7 +58,7 @@ int64_t modularInverse(int64_t c, int64_t m) {
     }
     
     int64_t d = res.u;
-    while (d < 0) d += m;
+    while (d < 0) d += m; // Приведение отрицательного остатка
     d = d % m;
     
     std::cout << "\nРезультат:\n";

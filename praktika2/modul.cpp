@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+// Проверка числа на простоту (перебор делителей до корня из N)
 bool isPrime(int64_t n) {
     if (n <= 1) return false;
     if (n <= 3) return true;
@@ -18,11 +19,11 @@ bool isPrime(int64_t n) {
     return true;
 }
 
+// Демонстрация Малой теоремы Ферма
 void verifyFermatTheorem(int64_t a, int64_t p) {
     std::cout << "\nПроверка теоремы Ферма\n";
     std::cout << "Теорема: если p простое и a не делится на p, то a^(" << p-1 << ") ≡ 1 (mod " << p << ")\n";
     
-    // ИСПРАВЛЕНИЕ: если основание кратно модулю, теорема Ферма неприменима
     if (a % p == 0) {
         std::cout << "Основание a = " << a << " делится на p = " << p << ". Теорема Ферма неприменима (результат всегда 0).\n";
         return;
@@ -38,6 +39,7 @@ void verifyFermatTheorem(int64_t a, int64_t p) {
     }
 }
 
+// Метод 1: Возведение в степень с оптимизацией по теореме Ферма
 int64_t powerModFermat(int64_t a, int64_t x, int64_t p) {
     std::cout << "\nМетод 1: Через теорему Ферма\n";
     std::cout << "Вычисляем " << a << "^" << x << " mod " << p << "\n";
@@ -56,6 +58,7 @@ int64_t powerModFermat(int64_t a, int64_t x, int64_t p) {
         return 0;
     }
     
+    // Уменьшаем показатель степени по формуле x % (p - 1)
     int64_t reducedExp = x % (p - 1);
     std::cout << "Шаг 1: По теореме Ферма a^(" << p-1 << ") ≡ 1 mod " << p << "\n";
     std::cout << "Шаг 2: " << x << " = " << x/(p-1) << "·(" << p-1 << ") + " << reducedExp << "\n";
@@ -75,10 +78,12 @@ int64_t powerModFermat(int64_t a, int64_t x, int64_t p) {
     return result;
 }
 
+// Метод 2: Быстрое бинарное возведение в степень (алгоритм Square-and-Multiply)
 int64_t powerModBinary(int64_t a, int64_t x, int64_t p) {
     std::cout << "\nМетод 2: Бинарное возведение в степень\n";
     std::cout << "Вычисляем " << a << "^" << x << " mod " << p << "\n";
     
+    // Получение двоичного вида степени для вывода шагов
     std::cout << "Шаг 1: Разложение " << x << " в двоичный вид\n";
     int64_t temp = x;
     std::string binary = "";
@@ -95,16 +100,17 @@ int64_t powerModBinary(int64_t a, int64_t x, int64_t p) {
     int64_t exponent = x;
     
     std::cout << "\nШаг 2: Возведение в квадрат\n";
+    // Итеративный разбор по битам степени
     while (exponent > 0) {
         if (exponent % 2 == 1) {
-            result = (result * base) % p;
+            result = (result * base) % p; // Если бит равен 1 — перемножаем
             std::cout << "    Бит 1: умножаем result = " << result << "\n";
         } else {
             std::cout << "    Бит 0: пропускаем умножение result = " << result << "\n";
         }
         exponent /= 2;
         if (exponent > 0) {
-            base = (base * base) % p;
+            base = (base * base) % p; // Основание возводится в квадрат каждую итерацию
             std::cout << "    Возводим в квадрат: base = " << base << "\n";
         }
     }

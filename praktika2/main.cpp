@@ -13,6 +13,7 @@ enum class MenuOption {
     EL_GAMAL = 4
 };
 
+// Сброс и очистка буфера ввода при ошибках
 void clearInput() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -35,7 +36,7 @@ int main() {
     do {
         showMenu();
         std::cin >> choice;
-        
+        // Валидация числового ввода
         if (std::cin.fail()) {
             clearInput();
             std::cout << "Ошибка, введите число от 0 до 4\n";

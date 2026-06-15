@@ -11,6 +11,7 @@ ElGamal::ElGamal(int64_t prime, int64_t generator, int64_t privateKey) {
     y = 0;
 }
 
+// Генерация открытого ключа: y = g^x mod p
 void ElGamal::generatePublicKey() {
     y = powerModBinary(g, x, p);
     std::cout << "  [Вычисление] Открытый ключ y = g^x mod p = " << y << std::endl;
@@ -19,7 +20,7 @@ void ElGamal::generatePublicKey() {
 int64_t ElGamal::getPublicKey() const {
     return y;
 }
-
+// Шифрование одного числа: возвращает пару (a = g^k mod p, b = m * y^k mod p)
 std::pair<int64_t, int64_t> ElGamal::encrypt(int64_t message, int64_t sessionKeyK) {
     std::cout << "\n--- Процесс шифрования Эль-Гамаля ---\n";
     std::cout << "Шаг 1: Вычисляем сессионную компоненту a = g^k mod p\n";
@@ -35,19 +36,21 @@ std::pair<int64_t, int64_t> ElGamal::encrypt(int64_t message, int64_t sessionKey
     return {a, b};
 }
 
+// Дешифрование одного числа: m = b * (a^x)^(-1) mod p
 int64_t ElGamal::decrypt(int64_t a, int64_t b) {
     std::cout << "\n--- Процесс дешифрования Эль-Гамаля ---\n";
     std::cout << "Шаг 1: Восстанавливаем общий секрет маски K = a^x mod p\n";
-    int64_t ax = powerModBinary(a, x, p);
+    int64_t ax = powerModBinary(a, x, p); // Общий секрет
     
     std::cout << "Шаг 2: Находим модульное обратное к секрету K^(-1) mod p\n";
-    int64_t ax_inverse = modularInverse(ax, p);
+    int64_t ax_inverse = modularInverse(ax, p); // Поиск обратного элемента через Евклида
     if (ax_inverse == -1) return -1;
     
     std::cout << "Шаг 3: Снимаем маску с сообщения m = (b * K^(-1)) mod p\n";
     return (b * ax_inverse) % p;
 }
 
+// Посимвольное шифрование строки текста
 std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const std::string& text, int64_t sessionKeyK) {
     std::vector<std::pair<int64_t, int64_t>> result;
     int64_t a = powerModBinary(g, sessionKeyK, p);
@@ -61,6 +64,7 @@ std::vector<std::pair<int64_t, int64_t>> ElGamal::encryptString(const std::strin
     return result;
 }
 
+// Посимвольное дешифрование вектора чисел в строку
 std::string ElGamal::decryptString(const std::vector<std::pair<int64_t, int64_t>>& cipherText) {
     if (cipherText.empty()) return "";
     
@@ -76,6 +80,7 @@ std::string ElGamal::decryptString(const std::vector<std::pair<int64_t, int64_t>
     return result;
 }
 
+// Побайтовое бинарное шифрование файлов любого типа
 bool ElGamal::encryptFile(const std::string& inputPath, const std::string& outputPath, int64_t sessionKeyK) {
     std::ifstream inFile(inputPath, std::ios::binary);
     std::ofstream outFile(outputPath, std::ios::binary);
@@ -96,6 +101,7 @@ bool ElGamal::encryptFile(const std::string& inputPath, const std::string& outpu
     return true;
 }
 
+// Побайтовое бинарное дешифрование файлов
 bool ElGamal::decryptFile(const std::string& inputPath, const std::string& outputPath) {
     std::ifstream inFile(inputPath, std::ios::binary);
     std::ofstream outFile(outputPath, std::ios::binary);
@@ -105,6 +111,7 @@ bool ElGamal::decryptFile(const std::string& inputPath, const std::string& outpu
     bool firstByte = true;
     int64_t ax_inverse = -1;
 
+    // Чтение блоками по 16 байт (8 байт на 'a' и 8 байт на 'b')
     while (inFile.read(reinterpret_cast<char*>(&a), sizeof(a)) &&
            inFile.read(reinterpret_cast<char*>(&b), sizeof(b))) {
         if (firstByte) {
