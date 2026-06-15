@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class ElGamal {
 private:
     int64_t p; 
@@ -21,16 +19,16 @@ public:
     void generatePublicKey();
     int64_t getPublicKey() const;
 
-    pair<int64_t, int64_t> encrypt(int64_t message, int64_t sessionKeyK);
+    std::pair<int64_t, int64_t> encrypt(int64_t message, int64_t sessionKeyK);
     int64_t decrypt(int64_t a, int64_t b);
 
-    // Работа со строками (ввод текста вручную)
-    vector<pair<int64_t, int64_t>> encryptString(const string& text, int64_t sessionKeyK);
-    string decryptString(const vector<pair<int64_t, int64_t>>& cipherText);
+    std::vector<std::pair<int64_t, int64_t>> encryptString(const std::string& text, int64_t sessionKeyK);
+    std::string decryptString(const std::vector<std::pair<int64_t, int64_t>>& cipherText);
 
-    // Работа с реальными файлами по пути на диске
-    bool encryptFile(const string& inputPath, const string& outputPath, int64_t sessionKeyK);
-    bool decryptFile(const string& inputPath, const string& outputPath);
+    bool encryptFile(const std::string& inputPath, const std::string& outputPath, int64_t sessionKeyK);
+    bool decryptFile(const std::string& inputPath, const std::string& outputPath);
 };
+
+void demonstrateElGamal();
 
 #endif
