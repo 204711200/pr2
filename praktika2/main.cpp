@@ -1,72 +1,93 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <clocale>
+
 #include "modul.h"
 #include "euclid.h"
 #include "el_gamal.h"
 
 enum class MenuOption {
     EXIT = 0,
-    POWER_MOD = 1,
-    EUCLID = 2,
-    MODUL_INVERSE = 3,
-    EL_GAMAL = 4
+    POWER_MOD,
+    EXTENDED_EUCLID,
+    MODULAR_INVERSE,
+    EL_GAMAL
 };
 
-// Сброс и очистка буфера ввода при ошибках
-void clearInput() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+void clearInputBuffer() {
+    using namespace std;
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-void showMenu() {
-    std::cout << "\n================ МЕНЮ ================\n";
-    std::cout << "1. Задание 1\n";
-    std::cout << "2. Задание 2\n";
-    std::cout << "3. Задание 3\n";
-    std::cout << "4. Задание 4\n";
-    std::cout << "0. Выход\n";
-    std::cout << "Ваш выбор: ";
+void printMenu() {
+    using namespace std;
+    cout << "\n--- МАТЕМАТИЧЕСКИЕ ОСНОВЫ КРИПТОГРАФИИ ---\n";
+    cout << "1. Возведение в степень по модулю (Ферма / Бинарный метод)\n";
+    cout << "2. Расширенный алгоритм Евклида\n";
+    cout << "3. Вычисление мультипликативно обратного элемента\n";
+    cout << "4. Криптосистема Эль-Гамаля (Консоль / Файлы)\n";
+    cout << "0. Выход из программы\n";
+    cout << "------------------------------------------\n";
+    cout << "Ваш выбор: ";
+}
+
+void waitForUser() {
+    using namespace std;
+    cout << "\nНажмите Enter, чтобы вернуться в меню...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+    cout << string(50, '\n');
 }
 
 int main() {
-    int choice; 
-    std::cout << "Добро пожаловать\n";
+    using namespace std;
+    setlocale(LC_ALL, "Russian");
+    
+    int userChoice;
+    MenuOption selectedOption = MenuOption::EXIT;
     
     do {
-        showMenu();
-        std::cin >> choice;
-        // Валидация числового ввода
-        if (std::cin.fail()) {
-            clearInput();
-            std::cout << "Ошибка, введите число от 0 до 4\n";
+        printMenu();
+        cin >> userChoice;
+        cout << "\n";
+        
+        if (cin.fail() || userChoice < 0 || userChoice > 4) {
+            clearInputBuffer();
+            cout << "[Ошибка] Неверный ввод! Пожалуйста, введите число от 0 до 4.\n";
             continue;
         }
         
-        MenuOption option = static_cast<MenuOption>(choice);
+        selectedOption = static_cast<MenuOption>(userChoice);
         
-        switch (option) {
+        switch (selectedOption) {
             case MenuOption::POWER_MOD:
                 demonstratePowerMod();
                 break;
-            case MenuOption::EUCLID:
+                
+            case MenuOption::EXTENDED_EUCLID:
                 demonstrateExtendedGCD();
                 break;
-            case MenuOption::MODUL_INVERSE:
+                
+            case MenuOption::MODULAR_INVERSE:
                 demonstrateModularInverse();
                 break;
+                
             case MenuOption::EL_GAMAL:
                 demonstrateElGamal();
                 break;
+                
             case MenuOption::EXIT:
-                std::cout << "\nДо свидания\n";
-                break;
-            default:
-                std::cout << "Неверный выбор\n";
+                cout << "Программа успешно завершена. До свидания!\n";
                 break;
         }
         
-    } while (choice != 0);
+        if (selectedOption != MenuOption::EXIT) {
+            waitForUser();
+        }
+        
+    } while (selectedOption != MenuOption::EXIT);
     
     return 0;
 }

@@ -29,6 +29,9 @@ public:
     bool decryptFile(const std::string& inputPath, const std::string& outputPath);
 };
 
+void processConsoleMode(ElGamal& cipher, int64_t sessionKey);
+void processFileMode(ElGamal& cipher, int64_t sessionKey);
+
 void demonstrateElGamal();
 
 #endif

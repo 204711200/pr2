@@ -119,12 +119,8 @@ int64_t powerModBinary(int64_t a, int64_t x, int64_t p) {
     return result;
 }
 
-void demonstratePowerMod() {
-    std::cout << "\n================ ЗАДАНИЕ 1 ================\n";
-    int64_t a, x, p;
-    std::cout << "Основание a: "; std::cin >> a;
-    std::cout << "Степень x: "; std::cin >> x;
-    
+int64_t readPrimeModule() {
+    int64_t p;
     do {
         std::cout << "Модуль p (должен быть простым): ";
         std::cin >> p;
@@ -132,6 +128,16 @@ void demonstratePowerMod() {
             std::cout << "  Ошибка: p должно быть простым числом\n";
         }
     } while (!isPrime(p));
+    return p;
+}
+
+void demonstratePowerMod() {
+    std::cout << "\n================ ЗАДАНИЕ 1 ================\n";
+    int64_t a, x, p;
+    std::cout << "Основание a: "; std::cin >> a;
+    std::cout << "Степень x: "; std::cin >> x;
+    
+    p = readPrimeModule(); 
     
     std::cout << "\nИсходные данные: a = " << a << ", x = " << x << ", p = " << p << "\n";
     verifyFermatTheorem(a, p);
@@ -140,12 +146,5 @@ void demonstratePowerMod() {
     int64_t result2 = powerModBinary(a, x, p);
     
     std::cout << "\nСравнение методов:\n";
-    std::cout << "Метод Ферма:   " << a << "^" << x << " mod " << p << " = " << result1 << "\n";
-    std::cout << "Бинарный метод: " << a << "^" << x << " mod " << p << " = " << result2 << "\n";
-    
-    if (result1 == result2) {
-        std::cout << "Результаты совпадают\n";
-    } else {
-        std::cout << "Результаты не совпали!\n";
-    }
+    std::cout << "Метод Ферма:   " << result1 << "\nБинарный метод: " << result2 << "\n";
 }

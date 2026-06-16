@@ -128,15 +128,47 @@ bool ElGamal::decryptFile(const std::string& inputPath, const std::string& outpu
     return true;
 }
 
+void processConsoleMode(ElGamal& cipher, int64_t sessionKey) {
+    std::string text;
+    std::cout << "Введите строку текста: ";
+    std::cin.ignore(); 
+    std::getline(std::cin, text);
+
+    auto cipherText = cipher.encryptString(text, sessionKey);
+    std::string decryptedText = cipher.decryptString(cipherText);
+    std::cout << "Расшифрованная строка: \"" << decryptedText << "\"\n";
+}
+
+void processFileMode(ElGamal& cipher, int64_t sessionKey) {
+    std::string inputPath;
+    std::cout << "Введите имя исходного файла: "; 
+    std::cin >> inputPath;
+
+    std::string outputPath = inputPath + ".enc";  
+    std::string decryptedPath = inputPath + ".dec"; 
+
+    if (cipher.encryptFile(inputPath, outputPath, sessionKey)) {
+        std::cout << "Успех: файл зашифрован.\n";
+    }
+    if (cipher.decryptFile(outputPath, decryptedPath)) {
+        std::cout << "Успех: файл расшифрован.\nСодержимое восстановленного файла: \"";
+        std::ifstream resFile(decryptedPath);
+        std::string content;
+        while (std::getline(resFile, content)) {
+            std::cout << content << (resFile.eof() ? "" : "\n");
+        }
+        std::cout << "\"\n";
+        resFile.close();
+    }
+}
+
 void demonstrateElGamal() {
     std::cout << "\n================ ЗАДАНИЕ 4 ================\n";
     int64_t p, g, xA, kB;
     
-    std::cout << "Введите простое число p: "; std::cin >> p;
-    while (!isPrime(p)) {
-        std::cout << "p должно быть простым. Введите другое число: "; std::cin >> p;
-    }
-    std::cout << "Введите генератор g: "; std::cin >> g;
+    p = readPrimeModule(); // Вызываем простую валидацию из модуля modul
+    
+    std::cout << "Введите g: "; std::cin >> g;
     std::cout << "Введите секретный ключ Алисы x: "; std::cin >> xA;
     
     ElGamal alice(p, g, xA);
@@ -148,32 +180,8 @@ void demonstrateElGamal() {
     int mode; std::cin >> mode;
 
     if (mode == 1) {
-        std::string text;
-        std::cout << "Введите строку текста: ";
-        std::cin.ignore(); 
-        std::getline(std::cin, text);
-
-        auto cipherText = alice.encryptString(text, kB);
-        std::string decryptedText = alice.decryptString(cipherText);
-        std::cout << "Расшифрованная строка: \"" << decryptedText << "\"\n";
-    } 
-    else {
-        std::string inputPath;
-        std::cout << "Введите имя исходного файла: "; std::cin >> inputPath;
-
-        std::string outputPath = inputPath + ".enc";  
-        std::string decryptedPath = inputPath + ".dec"; 
-
-        if (alice.encryptFile(inputPath, outputPath, kB)) std::cout << "Успех: файл зашифрован.\n";
-        if (alice.decryptFile(outputPath, decryptedPath)) {
-            std::cout << "Успех: файл расшифрован.\nСодержимое восстановленного файла: \"";
-            std::ifstream resFile(decryptedPath);
-            std::string content;
-            while (std::getline(resFile, content)) {
-                std::cout << content << (resFile.eof() ? "" : "\n");
-            }
-            std::cout << "\"\n";
-            resFile.close();
-        }
+        processConsoleMode(alice, kB); 
+    } else {
+        processFileMode(alice, kB);    
     }
 }
